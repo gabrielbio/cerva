@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calculadora de Leveduras - Câmara de Neubauer</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      margin: 0;
+      padding: 24px;
+      color: #222;
+    }
+
+    .container {
+      max-width: 980px;
+      margin: auto;
+      background: #fff;
+      padding: 28px;
+      border-radius: 14px;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.08);
+    }
+
+    h1 {
+      margin-top: 0;
+      color: #17324d;
+      font-size: 1.8rem;
+    }
+
+    h2 {
+      margin-top: 28px;
+      color: #17324d;
+      font-size: 1.2rem;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 6px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 16px;
+    }
+
+    label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 6px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #bbb;
+      border-radius: 8px;
+      font-size: 1rem;
+      box-sizing: border-box;
+      background: #fff;
+    }
+
+    .hint {
+      font-size: 0.85rem;
+      color: #666;
+      margin-top: 4px;
+      line-height: 1.35;
+    }
+
+    button {
+      margin-top: 24px;
+      padding: 12px 20px;
+      font-size: 1rem;
+      background: #17324d;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    button:hover { background: #244a70; }
+
+    .results {
+      margin-top: 28px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+    }
+
+    .card {
+      background: #f8fafc;
+      border: 1px solid #dbe3ea;
+      border-radius: 12px;
+      padding: 16px;
+    }
+
+    .card .label {
+      font-size: 0.9rem;
+      color: #555;
+      margin-bottom: 8px;
+    }
+
+    .card .value {
+      font-size: 1.35rem;
+      font-weight: bold;
+      color: #17324d;
+      overflow-wrap: anywhere;
+    }
+
+    .formula {
+      background: #eef3f7;
+      padding: 14px;
+      border-radius: 10px;
+      font-family: Consolas, monospace;
+      overflow-x: auto;
+      line-height: 1.6;
+    }
+
+    .warning {
+      background: #fff6df;
+      border-left: 5px solid #e0a800;
+      padding: 12px 14px;
+      border-radius: 8px;
+      margin-top: 18px;
+      color: #5c4300;
+      line-height: 1.45;
+    }
+
+    .small {
+      font-size: 0.9rem;
+      color: #555;
+      line-height: 1.5;
+    }
+
+    .export-box {
+      margin-top: 24px;
+      background: #eef3f7;
+      border: 1px solid #dbe3ea;
+      border-radius: 12px;
+      padding: 16px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+      font-size: 0.95rem;
+    }
+
+    th, td {
+      border: 1px solid #dbe3ea;
+      padding: 8px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      width: 45%;
+      background: #f8fafc;
+    }
+
+    .schema-box {
+      margin: 18px 0 24px;
+      background: #f8fafc;
+      border: 1px solid #dbe3ea;
+      border-radius: 12px;
+      padding: 16px;
+    }
+
+    .schema-title {
+      font-weight: bold;
+      color: #17324d;
+      margin-bottom: 10px;
+    }
+
+    .ascii-diagram {
+      background: #ffffff;
+      border: 1px solid #dbe3ea;
+      border-radius: 10px;
+      padding: 14px;
+      overflow-x: auto;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 0.9rem;
+      line-height: 1.3;
+      color: #17324d;
+      white-space: pre;
+    }
+
+    .status-box {
+      margin-top: 18px;
+      border-radius: 12px;
+      padding: 14px;
+      border-left: 5px solid #8a9bad;
+      background: #f8fafc;
+      line-height: 1.45;
+    }
+
+    .status-ok { border-left-color: #2e7d32; background: #eef8ef; color: #1b4d21; }
+    .status-alerta { border-left-color: #e0a800; background: #fff8e5; color: #5c4300; }
+    .status-erro { border-left-color: #b3261e; background: #fdeeee; color: #611410; }
+
+    .mini-diagram {
+      background: #fff;
+      border: 1px solid #dbe3ea;
+      border-radius: 10px;
+      padding: 12px;
+      overflow-x: auto;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 0.88rem;
+      line-height: 1.35;
+      color: #17324d;
+      white-space: pre;
+      margin-top: 10px;
+    }
+
+    .button-secondary {
+      background: #eef3f7;
+      color: #17324d;
+      border: 1px solid #b9c8d6;
+      margin-left: 8px;
+    }
+
+    .button-secondary:hover { background: #dfeaf2; }
+
+    #relatorioImpressao {
+      display: none;
+    }
+
+    .report-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+
+    .report-meta {
+      font-size: 0.9rem;
+      color: #555;
+      text-align: right;
+      line-height: 1.4;
+    }
+
+    @media print {
+      body { background: #fff; padding: 0; }
+      .container { box-shadow: none; max-width: none; }
+      button, .export-box button { display: none; }
+      input, select { border: 1px solid #999; }
+      .card { break-inside: avoid; }
+      .schema-box, .warning, .status-box, table { break-inside: avoid; }
+      .container > :not(#relatorioImpressao) { display: none !important; }
+      #relatorioImpressao { display: block !important; }
+      #relatorioImpressao .formula, #relatorioImpressao table { break-inside: avoid; }
+      #relatorioImpressao h1 { font-size: 1.5rem; }
+      #relatorioImpressao h2 { margin-top: 18px; }
+    }
+
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Calculadora de concentração e inoculação de leveduras - Câmara de Neubauer</h1>
+
+    <p class="small">
+      Esta calculadora usa a área de cada quadradinho pequeno da região central da Neubauer:
+      <strong>0,0025 mm²</strong>, com profundidade de <strong>0,100 mm</strong>.
+      O volume de cada quadradinho é <strong>0,00025 mm³</strong>, ou
+      <strong>2,5 × 10⁻⁷ mL</strong>.
+    </p>
+
+    <h2>Identificação da amostra</h2>
+    <div class="grid">
+      <div>
+        <label for="nomeAmostra">Nome da amostra</label>
+        <input type="text" id="nomeAmostra" value="" placeholder="Ex.: Levedura lote A" />
+      </div>
+      <div>
+        <label for="dataAmostra">Data da amostra</label>
+        <input type="date" id="dataAmostra" value="" />
+      </div>
+      <div>
+        <label for="responsavelAmostra">Responsável</label>
+        <input type="text" id="responsavelAmostra" value="" placeholder="Nome de quem realizou a contagem" />
+      </div>
+      <div>
+        <label for="linhagemFermento">Linhagem/fermento</label>
+        <input type="text" id="linhagemFermento" value="" placeholder="Ex.: US-05, S-04, W34/70" />
+      </div>
+      <div>
+        <label for="loteFermento">Lote</label>
+        <input type="text" id="loteFermento" value="" placeholder="Lote do fermento ou da suspensão" />
+      </div>
+      <div>
+        <label for="observacoesAmostra">Observações</label>
+        <textarea id="observacoesAmostra" rows="3" placeholder="Ex.: tempo de hidratação, temperatura, corante usado, presença de grumos"></textarea>
+      </div>
+    </div>
+
+    <div class="schema-box">
+      <div class="schema-title">Esquema visual simplificado da área de contagem</div>
+      <div class="ascii-diagram">QUADRADO MAIOR (região central)
+┌─────────┬─────────┬─────────┬─────────┬─────────┐
+│ QUAD.   │ QUAD.   │ QUAD.   │ QUAD.   │ QUAD.   │
+│ MÉDIO   │ MÉDIO   │ MÉDIO   │ MÉDIO   │ MÉDIO   │
+├─────────┼─────────┼─────────┼─────────┼─────────┤
+│ QUAD.   │ QUAD.   │ QUAD.   │ QUAD.   │ QUAD.   │
+│ MÉDIO   │ MÉDIO   │ MÉDIO   │ MÉDIO   │ MÉDIO   │
+├─────────┼─────────┼─────────┼─────────┼─────────┤
+│ QUAD.   │ QUAD.   │ QUAD.   │ QUAD.   │ QUAD.   │
+│ MÉDIO   │ MÉDIO   │ MÉDIO   │ MÉDIO   │ MÉDIO   │
+├─────────┼─────────┼─────────┼─────────┼─────────┤
+│ QUAD.   │ QUAD.   │ QUAD.   │ QUAD.   │ QUAD.   │
+│ MÉDIO   │ MÉDIO   │ MÉDIO   │ MÉDIO   │ MÉDIO   │
+├─────────┼─────────┼─────────┼─────────┼─────────┤
+│ QUAD.   │ QUAD.   │ QUAD.   │ QUAD.   │ QUAD.   │
+│ MÉDIO   │ MÉDIO   │ MÉDIO   │ MÉDIO   │ MÉDIO   │
+└─────────┴─────────┴─────────┴─────────┴─────────┘
+
+CADA QUADRADO MÉDIO = 16 QUADRADINHOS PEQUENOS (4 × 4)
+┌────┬────┬────┬────┐
+│  • │  • │  • │  • │
+├────┼────┼────┼────┤
+│  • │  • │  • │  • │   ← conte as células vivas e mortas
+├────┼────┼────┼────┤      dentro dos quadradinhos pequenos
+│  • │  • │  • │  • │      selecionados na sua contagem
+├────┼────┼────┼────┤
+│  • │  • │  • │  • │
+└────┴────┴────┴────┘
+
+RESUMO:
+- 1 quadrado maior = 25 quadrados médios
+- 1 quadrado médio = 16 quadradinhos pequenos
+- Se contar 5 quadrados médios: 5 × 16 = 80 quadradinhos pequenos
+- Se contar 25 quadrados médios: 25 × 16 = 400 quadradinhos pequenos</div>
+      <div class="hint" style="margin-top:10px;">
+        Esquema ilustrativo para facilitar o entendimento da hierarquia entre o quadrado maior, os quadrados médios e os quadradinhos pequenos usados na contagem.
+      </div>
+    </div>
+
+    <div class="schema-box">
+      <div class="schema-title">Regra de borda sugerida para evitar dupla contagem</div>
+      <div class="small">
+        Adote uma regra fixa durante toda a contagem. Uma opção comum é <strong>contar</strong> as células que tocam as linhas superior e esquerda, e <strong>não contar</strong> as que tocam as linhas inferior e direita.
+      </div>
+      <div class="mini-diagram">┌─────── contar ───────┐
+│  ●     ●      ●      │  ← linha superior: contar
+│                      │
+│  ●              ○    │  ● = contar
+│                      │  ○ = não contar
+│  ●     ○      ○      │
+└──── não contar ──────┘
+linha esquerda: contar     linha direita/inferior: não contar</div>
+    </div>
+
+    <h2>1. Dados da contagem</h2>
+    <p class="small">
+      Você pode informar diretamente a soma das células contadas ou usar o modo guiado por duas câmaras/replicatas. No modo guiado, a calculadora soma automaticamente as células vivas e mortas e avalia a diferença entre as duas contagens.
+    </p>
+
+    <div class="grid">
+      <div>
+        <label for="modoContagem">Modo de entrada da contagem</label>
+        <select id="modoContagem">
+          <option value="manual" selected>Manual: informar totais contados</option>
+          <option value="camaras">Guiado: duas câmaras/replicatas</option>
+        </select>
+        <div class="hint">No modo guiado, os totais abaixo são preenchidos automaticamente.</div>
+      </div>
+      <div>
+        <label for="quadradosMediosSelect">Área contada</label>
+        <select id="quadradosMediosSelect">
+          <option value="" selected>Selecione a área contada</option>
+          <option value="5">5 quadrados médios = 80 quadradinhos pequenos</option>
+          <option value="10">10 quadrados médios = 160 quadradinhos pequenos</option>
+          <option value="25">25 quadrados médios = 400 quadradinhos pequenos</option>
+          <option value="personalizado">Personalizado</option>
+        </select>
+        <div class="hint">A calculadora converte quadrados médios em quadradinhos pequenos.</div>
+      </div>
+      <div id="quadradosMediosPersonalizadoBox" class="hidden">
+        <label for="quadradosMediosCustom">Quadrados médios contados</label>
+        <input type="number" id="quadradosMediosCustom" value="" min="0.000001" step="0.5" />
+        <div class="hint">Cada quadrado médio equivale a 16 quadradinhos pequenos.</div>
+      </div>
+      <div>
+        <label for="quadradinhos">Número de quadradinhos pequenos contados</label>
+        <input type="number" id="quadradinhos" value="" min="1" step="1" />
+        <div class="hint">Pode ser preenchido automaticamente pela área contada ou ajustado manualmente.</div>
+      </div>
+    </div>
+
+    <div id="contagemCamarasBox" class="schema-box hidden">
+      <div class="schema-title">Contagem por duas câmaras/replicatas</div>
+      <div class="grid">
+        <div>
+          <label for="vivasCamara1">Câmara 1 - células vivas</label>
+          <input type="number" id="vivasCamara1" value="" min="0" step="1" />
+        </div>
+        <div>
+          <label for="mortasCamara1">Câmara 1 - células mortas</label>
+          <input type="number" id="mortasCamara1" value="" min="0" step="1" />
+        </div>
+        <div>
+          <label for="vivasCamara2">Câmara 2 - células vivas</label>
+          <input type="number" id="vivasCamara2" value="" min="0" step="1" />
+        </div>
+        <div>
+          <label for="mortasCamara2">Câmara 2 - células mortas</label>
+          <input type="number" id="mortasCamara2" value="" min="0" step="1" />
+        </div>
+      </div>
+      <div class="hint">A diferença entre as duas câmaras é calculada a partir do total de células em cada uma.</div>
+    </div>
+
+    <div class="grid">
+      <div>
+        <label for="vivas">Células vivas contadas</label>
+        <input type="number" id="vivas" value="" min="0" step="1" />
+        <div class="hint">Ex.: soma das vivas nas duas câmaras.</div>
+      </div>
+      <div>
+        <label for="mortas">Células mortas contadas</label>
+        <input type="number" id="mortas" value="" min="0" step="1" />
+        <div class="hint">Ex.: soma das mortas nas duas câmaras.</div>
+      </div>
+      <div>
+        <label for="diluicao">Fator de diluição</label>
+        <input type="number" id="diluicao" value="" min="1" step="0.01" />
+        <div class="hint">Sem diluição = 1. Diluição 1:10 = 10.</div>
+      </div>
+    </div>
+
+    <div id="alertaContagem" class="status-box">A avaliação da faixa de contagem aparecerá aqui após o cálculo.</div>
+
+    <h2>2. Dados da hidratação do fermento</h2>
+    <div class="grid">
+      <div>
+        <label for="massaFermento">Massa de fermento hidratada (g)</label>
+        <input type="number" id="massaFermento" value="" min="0.000001" step="0.01" />
+        <div class="hint">Ex.: massa de fermento seco usada na hidratação.</div>
+      </div>
+      <div>
+        <label for="volumeHidratacao">Volume final da suspensão hidratada (mL)</label>
+        <input type="number" id="volumeHidratacao" value="" min="0.000001" step="0.1" />
+        <div class="hint">Ex.: volume total após hidratar e homogeneizar o fermento.</div>
+      </div>
+    </div>
+
+    <h2>3. Dados da câmara</h2>
+    <div class="grid">
+      <div>
+        <label for="area">Área de cada quadradinho pequeno (mm²)</label>
+        <input type="number" id="area" value="0.0025" min="0.000001" step="0.0001" />
+      </div>
+      <div>
+        <label for="profundidade">Profundidade da câmara (mm)</label>
+        <input type="number" id="profundidade" value="0.1" min="0.000001" step="0.001" />
+      </div>
+    </div>
+
+    <h2>4. Massa necessária para fermentar</h2>
+    <p class="small">
+      Esta seção estima a massa de fermento necessária a partir da taxa de inoculação em
+      <strong>milhões de células/mL/°P</strong>. O cálculo usa preferencialmente as
+      <strong>células vivas por grama</strong>, pois a inoculação deve considerar células viáveis.
+    </p>
+    <div class="grid">
+      <div>
+        <label for="volumeMostoL">Volume do mosto (L)</label>
+        <input type="number" id="volumeMostoL" value="" min="0.000001" step="0.1" />
+        <div class="hint">Ex.: 20 L.</div>
+      </div>
+      <div>
+        <label for="gravidadeEspecifica">Gravidade específica do mosto (SG)</label>
+        <input type="number" id="gravidadeEspecifica" value="" min="0.990" step="0.001" />
+        <div class="hint">Ao alterar este valor, o campo de °P é atualizado automaticamente. Ex.: 1,048 ≈ 11,91 °P.</div>
+      </div>
+      <div>
+        <label for="grauPlato">Grau Plato do mosto (°P)</label>
+        <input type="number" id="grauPlato" value="" min="0.000001" step="0.01" />
+        <div class="hint">Pode ser preenchido pela SG ou ajustado manualmente.</div>
+      </div>
+      <div>
+        <label for="taxaInoculacaoSelect">Taxa de inoculação</label>
+        <select id="taxaInoculacaoSelect">
+          <option value="" selected>Selecione a taxa de inoculação</option>
+          <option value="0.50">0,50 milhão células/mL/°P</option>
+          <option value="0.75">0,75 milhão células/mL/°P - Ale padrão</option>
+          <option value="1.00">1,00 milhão células/mL/°P</option>
+          <option value="1.25">1,25 milhão células/mL/°P</option>
+          <option value="1.50">1,50 milhão células/mL/°P - Lager padrão</option>
+          <option value="2.00">2,00 milhões células/mL/°P</option>
+          <option value="personalizada">Personalizada</option>
+        </select>
+        <div class="hint">A taxa representa milhões de células por mL de mosto por °P.</div>
+      </div>
+      <div id="taxaPersonalizadaBox" class="hidden">
+        <label for="taxaInoculacaoCustom">Taxa personalizada</label>
+        <input type="number" id="taxaInoculacaoCustom" value="" min="0.000001" step="0.01" />
+        <div class="hint">Informe em milhões de células/mL/°P.</div>
+      </div>
+      <div>
+        <label for="massaPacote">Massa do pacote comercial (g)</label>
+        <input type="number" id="massaPacote" value="" min="0.000001" step="0.1" />
+        <div class="hint">Usado para calcular o número de pacotes equivalentes.</div>
+      </div>
+    </div>
+
+    <div class="results">
+      <div class="card"><div class="label">Volume total contado</div><div class="value" id="volumeTotal">-</div></div>
+      <div class="card"><div class="label">Células totais por mL</div><div class="value" id="celulasTotaisMl">-</div></div>
+      <div class="card"><div class="label">Células vivas por mL</div><div class="value" id="celulasVivasMl">-</div></div>
+      <div class="card"><div class="label">Células mortas por mL</div><div class="value" id="celulasMortasMl">-</div></div>
+      <div class="card"><div class="label">Viabilidade celular</div><div class="value" id="viabilidade">-</div></div>
+      <div class="card"><div class="label">Interpretação da viabilidade</div><div class="value" id="interpretacaoViabilidade">-</div></div>
+      <div class="card"><div class="label">Média por quadradinho pequeno</div><div class="value" id="mediaQuadradinho">-</div></div>
+      <div class="card"><div class="label">Avaliação da contagem</div><div class="value" id="avaliacaoContagem">-</div></div>
+      <div class="card"><div class="label">Diferença entre câmaras</div><div class="value" id="diferencaCamaras">-</div></div>
+      <div class="card"><div class="label">Células totais por grama de fermento</div><div class="value" id="celulasTotaisG">-</div></div>
+      <div class="card"><div class="label">Células vivas por grama de fermento</div><div class="value" id="celulasVivasG">-</div></div>
+      <div class="card"><div class="label">Células mortas por grama de fermento</div><div class="value" id="celulasMortasG">-</div></div>
+      <div class="card"><div class="label">Células necessárias para inoculação</div><div class="value" id="celulasNecessarias">-</div></div>
+      <div class="card"><div class="label">Células necessárias em milhões</div><div class="value" id="celulasNecessariasMilhoes">-</div></div>
+      <div class="card"><div class="label">Células necessárias em bilhões</div><div class="value" id="celulasNecessariasBilhoes">-</div></div>
+      <div class="card"><div class="label">Massa necessária de fermento</div><div class="value" id="massaNecessaria">-</div></div>
+      <div class="card"><div class="label" id="labelPacotesEquivalentes">Pacotes equivalentes</div><div class="value" id="pacotesEquivalentes">-</div></div>
+    </div>
+
+    <div class="export-box">
+      <strong>Exportar resultados e relatório</strong>
+      <p class="small">Use os botões abaixo para baixar os dados em CSV ou gerar um relatório organizado para impressão/PDF.</p>
+      <button onclick="exportarCSV()">Exportar CSV</button>
+      <button class="button-secondary" onclick="imprimirRelatorio()">Gerar relatório para impressão / PDF</button>
+    </div>
+
+    <h2>Resumo dos dados e resultados</h2>
+    <table><tbody id="tabelaResumo"></tbody></table>
+
+    <h2>Como o cálculo é feito</h2>
+    <div class="formula" id="formulaTexto">
+      Volume de 1 quadradinho = área × profundidade<br>
+      Volume total contado = volume de 1 quadradinho × número de quadradinhos<br>
+      Células/mL = células contadas ÷ volume total em mL × fator de diluição<br>
+      Células por grama = células/mL × volume final da suspensão hidratada ÷ massa de fermento hidratada<br>
+      Conversão SG → °P = -616,868 + 1111,14 × SG - 630,272 × SG² + 135,997 × SG³<br>
+      Células necessárias = taxa de inoculação × 1.000.000 × volume do mosto em mL × °P<br>
+      Células necessárias em milhões = células necessárias ÷ 1.000.000<br>
+      Células necessárias em bilhões = células necessárias ÷ 1.000.000.000<br>
+      Massa necessária = células necessárias ÷ células vivas por grama
+    </div>
+
+    <div class="warning">
+      Atenção: o campo “número de quadradinhos pequenos contados” precisa corresponder exatamente à área realmente contada.
+      Por exemplo, se foram contados 5 quadrados médios da área central, isso equivale a 5 × 16 = 80 quadradinhos pequenos.
+      Se foram contados 25 quadrados médios, equivale a 25 × 16 = 400 quadradinhos pequenos.
+      Para o cálculo por grama, informe a massa de fermento que foi hidratada e o volume final total da suspensão hidratada.
+    </div>
+
+    <div id="relatorioImpressao"></div>
+  </div>
+
+  <script>
+    let ultimoResultado = {};
+
+    function valorCampo(id, padrao = "Não informado") {
+      const elemento = document.getElementById(id);
+      if (!elemento) return padrao;
+      const valor = String(elemento.value || "").trim();
+      return valor || padrao;
+    }
+
+    function dataHoraAtualFormatada() {
+      return new Date().toLocaleString("pt-BR", {
+        day: "2-digit", month: "2-digit", year: "numeric",
+        hour: "2-digit", minute: "2-digit"
+      });
+    }
+
+    function escaparHtml(texto) {
+      return String(texto ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function converterQuebras(texto) {
+      return escaparHtml(texto).replace(/\n/g, "<br>");
+    }
+
+    function converterTabelaResumoParaHtml() {
+      let html = "";
+      Object.entries(ultimoResultado).forEach(([chave, valor]) => {
+        let valorFormatado = valor;
+        if (typeof valor === "number") {
+          if (Math.abs(valor) >= 100000 || (Math.abs(valor) > 0 && Math.abs(valor) < 0.001)) {
+            valorFormatado = formatarCientifico(valor, 6);
+          } else {
+            valorFormatado = valor.toLocaleString("pt-BR", { maximumFractionDigits: 8 });
+          }
+        }
+        html += "<tr><th>" + escaparHtml(chave) + "</th><td>" + escaparHtml(valorFormatado) + "</td></tr>";
+      });
+      return html;
+    }
+
+    function converterParaSuperescrito(numero) {
+      const mapa = {"-":"⁻","+":"⁺","0":"⁰","1":"¹","2":"²","3":"³","4":"⁴","5":"⁵","6":"⁶","7":"⁷","8":"⁸","9":"⁹"};
+      return String(numero).split("").map(caractere => mapa[caractere] || caractere).join("");
+    }
+
+    function formatarCientifico(valor, casas = 2) {
+      if (!isFinite(valor) || valor === 0) return "0";
+      const partes = valor.toExponential(casas).split("e");
+      const mantissa = Number(partes[0]).toLocaleString("pt-BR", { minimumFractionDigits: casas, maximumFractionDigits: casas });
+      const expoente = parseInt(partes[1], 10);
+      return mantissa + " × 10" + converterParaSuperescrito(expoente);
+    }
+
+    function formatarNumero(valor, casas = 2) {
+      if (!isFinite(valor)) return "0";
+      return valor.toLocaleString("pt-BR", { minimumFractionDigits: casas, maximumFractionDigits: casas });
+    }
+
+    function converterSGParaPlato(sg) {
+      if (!isFinite(sg) || sg <= 0) return 0;
+      return -616.868 + (1111.14 * sg) - (630.272 * Math.pow(sg, 2)) + (135.997 * Math.pow(sg, 3));
+    }
+
+    function atualizarPlatoPelaGravidade() {
+      const sg = parseFloat(document.getElementById("gravidadeEspecifica").value) || 0;
+      const platoCalculado = converterSGParaPlato(sg);
+      if (platoCalculado > 0) {
+        document.getElementById("grauPlato").value = platoCalculado.toFixed(2);
+      }
+    }
+
+    function atualizarAreaContada() {
+      const select = document.getElementById("quadradosMediosSelect");
+      const box = document.getElementById("quadradosMediosPersonalizadoBox");
+      let quadradosMedios = 0;
+      if (select.value === "personalizado") {
+        box.classList.remove("hidden");
+        quadradosMedios = parseFloat(document.getElementById("quadradosMediosCustom").value) || 0;
+      } else {
+        box.classList.add("hidden");
+        quadradosMedios = parseFloat(select.value) || 0;
+      }
+      if (quadradosMedios > 0) {
+        document.getElementById("quadradinhos").value = Math.round(quadradosMedios * 16);
+      }
+    }
+
+    function atualizarModoContagem() {
+      const modo = document.getElementById("modoContagem").value;
+      const box = document.getElementById("contagemCamarasBox");
+      if (modo === "camaras") {
+        box.classList.remove("hidden");
+        const vivasCamara1 = parseFloat(document.getElementById("vivasCamara1").value) || 0;
+        const mortasCamara1 = parseFloat(document.getElementById("mortasCamara1").value) || 0;
+        const vivasCamara2 = parseFloat(document.getElementById("vivasCamara2").value) || 0;
+        const mortasCamara2 = parseFloat(document.getElementById("mortasCamara2").value) || 0;
+        document.getElementById("vivas").value = vivasCamara1 + vivasCamara2;
+        document.getElementById("mortas").value = mortasCamara1 + mortasCamara2;
+      } else {
+        box.classList.add("hidden");
+      }
+    }
+
+    function taxaSelecionada() {
+      const select = document.getElementById("taxaInoculacaoSelect");
+      const box = document.getElementById("taxaPersonalizadaBox");
+      if (select.value === "personalizada") {
+        box.classList.remove("hidden");
+        return parseFloat(document.getElementById("taxaInoculacaoCustom").value) || 0;
+      }
+      box.classList.add("hidden");
+      return parseFloat(select.value) || 0;
+    }
+
+    function interpretarViabilidade(viabilidade) {
+      if (viabilidade >= 90) return { texto: "Boa", classe: "status-ok", detalhe: "Viabilidade adequada para inoculação, considerando apenas este critério." };
+      if (viabilidade >= 80) return { texto: "Atenção", classe: "status-alerta", detalhe: "Viabilidade intermediária. Considere ajustar a massa de fermento e avaliar a condição fisiológica da cultura." };
+      return { texto: "Baixa", classe: "status-erro", detalhe: "Baixa viabilidade. O impacto na fermentação pode ser importante; considere nova propagação ou novo fermento." };
+    }
+
+    function avaliarFaixaContagem(mediaQuadradinho, totais) {
+      if (totais <= 0) return { texto: "Sem contagem", classe: "status-alerta", detalhe: "Informe as células contadas para avaliar a faixa de contagem." };
+      if (mediaQuadradinho < 0.5) return { texto: "Muito baixa", classe: "status-alerta", detalhe: "A média está baixa. Para reduzir erro amostral, conte mais quadradinhos ou use menor diluição." };
+      if (mediaQuadradinho <= 3) return { texto: "Adequada", classe: "status-ok", detalhe: "A média por quadradinho pequeno está em uma faixa didaticamente adequada para esta calculadora." };
+      if (mediaQuadradinho <= 5) return { texto: "Alta", classe: "status-alerta", detalhe: "A contagem está alta. Se houver sobreposição ou dificuldade de distinguir células, aumente a diluição." };
+      return { texto: "Muito alta", classe: "status-erro", detalhe: "A contagem está muito concentrada. Recomenda-se diluir mais a amostra e repetir a contagem." };
+    }
+
+    function diferencaEntreCamaras() {
+      if (document.getElementById("modoContagem").value !== "camaras") {
+        return { percentual: null, texto: "Não usada", detalhe: "Ative o modo guiado por duas câmaras/replicatas para avaliar a diferença." };
+      }
+      const total1 = (parseFloat(document.getElementById("vivasCamara1").value) || 0) + (parseFloat(document.getElementById("mortasCamara1").value) || 0);
+      const total2 = (parseFloat(document.getElementById("vivasCamara2").value) || 0) + (parseFloat(document.getElementById("mortasCamara2").value) || 0);
+      const media = (total1 + total2) / 2;
+      const percentual = media > 0 ? (Math.abs(total1 - total2) / media) * 100 : 0;
+      let detalhe = "Boa concordância entre as duas câmaras.";
+      if (percentual > 20) detalhe = "Diferença alta entre câmaras. Homogeneize melhor, revise a diluição e considere repetir a contagem.";
+      else if (percentual > 10) detalhe = "Diferença moderada entre câmaras. A contagem pode ser aceita em aula, mas merece atenção.";
+      return { percentual, texto: formatarNumero(percentual, 1) + "%", detalhe };
+    }
+
+    function calcular() {
+      atualizarModoContagem();
+
+      const vivas = parseFloat(document.getElementById("vivas").value) || 0;
+      const mortas = parseFloat(document.getElementById("mortas").value) || 0;
+      const quadradinhos = parseFloat(document.getElementById("quadradinhos").value) || 0;
+      const diluicao = parseFloat(document.getElementById("diluicao").value) || 1;
+      const area = parseFloat(document.getElementById("area").value) || 0;
+      const profundidade = parseFloat(document.getElementById("profundidade").value) || 0;
+      const massaFermento = parseFloat(document.getElementById("massaFermento").value) || 0;
+      const volumeHidratacao = parseFloat(document.getElementById("volumeHidratacao").value) || 0;
+      const volumeMostoL = parseFloat(document.getElementById("volumeMostoL").value) || 0;
+      const gravidadeEspecifica = parseFloat(document.getElementById("gravidadeEspecifica").value) || 0;
+      const grauPlatoCalculado = converterSGParaPlato(gravidadeEspecifica);
+      const grauPlato = parseFloat(document.getElementById("grauPlato").value) || 0;
+      const taxaInoculacao = taxaSelecionada();
+      const massaPacote = parseFloat(document.getElementById("massaPacote").value) || 0;
+
+      const totais = vivas + mortas;
+      const volumeQuadradinhoMm3 = area * profundidade;
+      const volumeTotalMm3 = volumeQuadradinhoMm3 * quadradinhos;
+      const volumeTotalMl = volumeTotalMm3 * 0.001;
+
+      const celulasTotaisMl = volumeTotalMl > 0 ? (totais / volumeTotalMl) * diluicao : 0;
+      const celulasVivasMl = volumeTotalMl > 0 ? (vivas / volumeTotalMl) * diluicao : 0;
+      const celulasMortasMl = volumeTotalMl > 0 ? (mortas / volumeTotalMl) * diluicao : 0;
+      const viabilidade = totais > 0 ? (vivas / totais) * 100 : 0;
+      const mediaQuadradinho = quadradinhos > 0 ? totais / quadradinhos : 0;
+
+      const celulasTotaisG = massaFermento > 0 ? (celulasTotaisMl * volumeHidratacao) / massaFermento : 0;
+      const celulasVivasG = massaFermento > 0 ? (celulasVivasMl * volumeHidratacao) / massaFermento : 0;
+      const celulasMortasG = massaFermento > 0 ? (celulasMortasMl * volumeHidratacao) / massaFermento : 0;
+
+      const volumeMostoMl = volumeMostoL * 1000;
+      const celulasNecessarias = taxaInoculacao * 1000000 * volumeMostoMl * grauPlato;
+      const celulasNecessariasMilhoes = celulasNecessarias / 1000000;
+      const celulasNecessariasBilhoes = celulasNecessarias / 1000000000;
+      const massaNecessaria = celulasVivasG > 0 ? celulasNecessarias / celulasVivasG : 0;
+      const pacotesEquivalentes = massaPacote > 0 ? massaNecessaria / massaPacote : 0;
+
+      const interpretacao = interpretarViabilidade(viabilidade);
+      const avaliacao = avaliarFaixaContagem(mediaQuadradinho, totais);
+      const diferenca = diferencaEntreCamaras();
+
+      ultimoResultado = {
+        "Nome da amostra": valorCampo("nomeAmostra"),
+        "Data da amostra": valorCampo("dataAmostra"),
+        "Responsável": valorCampo("responsavelAmostra"),
+        "Linhagem/fermento": valorCampo("linhagemFermento"),
+        "Lote": valorCampo("loteFermento"),
+        "Observações": valorCampo("observacoesAmostra"),
+        "Data e hora de geração do relatório": dataHoraAtualFormatada(),
+        "Modo de entrada da contagem": document.getElementById("modoContagem").value,
+        "Células vivas contadas": vivas,
+        "Células mortas contadas": mortas,
+        "Células totais contadas": totais,
+        "Quadradinhos pequenos contados": quadradinhos,
+        "Fator de diluição": diluicao,
+        "Avaliação da faixa de contagem": avaliacao.texto,
+        "Recomendação sobre diluição/contagem": avaliacao.detalhe,
+        "Diferença entre câmaras (%)": diferenca.percentual === null ? "Não usada" : diferenca.percentual,
+        "Interpretação da diferença entre câmaras": diferenca.detalhe,
+        "Área do quadradinho pequeno (mm²)": area,
+        "Profundidade da câmara (mm)": profundidade,
+        "Massa de fermento hidratada (g)": massaFermento,
+        "Volume final da suspensão hidratada (mL)": volumeHidratacao,
+        "Volume de 1 quadradinho (mm³)": volumeQuadradinhoMm3,
+        "Volume total contado (mm³)": volumeTotalMm3,
+        "Volume total contado (mL)": volumeTotalMl,
+        "Células totais por mL": celulasTotaisMl,
+        "Células vivas por mL": celulasVivasMl,
+        "Células mortas por mL": celulasMortasMl,
+        "Viabilidade celular (%)": viabilidade,
+        "Interpretação da viabilidade": interpretacao.texto,
+        "Média de células por quadradinho pequeno": mediaQuadradinho,
+        "Células totais por grama de fermento": celulasTotaisG,
+        "Células vivas por grama de fermento": celulasVivasG,
+        "Células mortas por grama de fermento": celulasMortasG,
+        "Volume do mosto (L)": volumeMostoL,
+        "Volume do mosto (mL)": volumeMostoMl,
+        "Gravidade específica do mosto (SG)": gravidadeEspecifica,
+        "Grau Plato calculado pela SG (°P)": grauPlatoCalculado,
+        "Grau Plato usado no cálculo (°P)": grauPlato,
+        "Taxa de inoculação (milhões de células/mL/°P)": taxaInoculacao,
+        "Massa do pacote comercial (g)": massaPacote,
+        "Células necessárias para inoculação": celulasNecessarias,
+        "Células necessárias para inoculação (milhões)": celulasNecessariasMilhoes,
+        "Células necessárias para inoculação (bilhões)": celulasNecessariasBilhoes,
+        "Massa necessária de fermento (g)": massaNecessaria,
+        "Pacotes comerciais equivalentes": pacotesEquivalentes
+      };
+
+      document.getElementById("volumeTotal").innerText = formatarCientifico(volumeTotalMl) + " mL";
+      document.getElementById("celulasTotaisMl").innerText = formatarCientifico(celulasTotaisMl) + " células/mL";
+      document.getElementById("celulasVivasMl").innerText = formatarCientifico(celulasVivasMl) + " células/mL";
+      document.getElementById("celulasMortasMl").innerText = formatarCientifico(celulasMortasMl) + " células/mL";
+      document.getElementById("viabilidade").innerText = formatarNumero(viabilidade, 2) + "%";
+      document.getElementById("interpretacaoViabilidade").innerText = interpretacao.texto;
+      document.getElementById("mediaQuadradinho").innerText = formatarNumero(mediaQuadradinho, 2) + " células";
+      document.getElementById("avaliacaoContagem").innerText = avaliacao.texto;
+      document.getElementById("diferencaCamaras").innerText = diferenca.texto;
+      document.getElementById("celulasTotaisG").innerText = formatarCientifico(celulasTotaisG) + " células/g";
+      document.getElementById("celulasVivasG").innerText = formatarCientifico(celulasVivasG) + " células/g";
+      document.getElementById("celulasMortasG").innerText = formatarCientifico(celulasMortasG) + " células/g";
+      document.getElementById("celulasNecessarias").innerText = formatarCientifico(celulasNecessarias) + " células";
+      document.getElementById("celulasNecessariasMilhoes").innerText = formatarNumero(celulasNecessariasMilhoes, 2) + " milhões de células";
+      document.getElementById("celulasNecessariasBilhoes").innerText = formatarNumero(celulasNecessariasBilhoes, 2) + " bilhões de células";
+      document.getElementById("massaNecessaria").innerText = formatarNumero(massaNecessaria, 4) + " g";
+      document.getElementById("labelPacotesEquivalentes").innerText = massaPacote > 0 ? "Pacotes de " + formatarNumero(massaPacote, 1) + " g equivalentes" : "Pacotes comerciais equivalentes";
+      document.getElementById("pacotesEquivalentes").innerText = formatarNumero(pacotesEquivalentes, 2) + " pacote(s)";
+
+      const alerta = document.getElementById("alertaContagem");
+      alerta.className = "status-box " + avaliacao.classe;
+      alerta.innerHTML = "<strong>Faixa de contagem: " + avaliacao.texto + ".</strong> " + avaliacao.detalhe + "<br><strong>Viabilidade: " + interpretacao.texto + ".</strong> " + interpretacao.detalhe + "<br><strong>Diferença entre câmaras:</strong> " + diferenca.detalhe;
+
+      document.getElementById("formulaTexto").innerHTML =
+        "Volume de 1 quadradinho = " + area + " mm² × " + profundidade + " mm = " + volumeQuadradinhoMm3 + " mm³<br>" +
+        "Volume total contado = " + volumeQuadradinhoMm3 + " mm³ × " + quadradinhos + " = " + volumeTotalMm3 + " mm³ = " + formatarCientifico(volumeTotalMl) + " mL<br>" +
+        "Células totais/mL = " + totais + " ÷ " + formatarCientifico(volumeTotalMl) + " × " + diluicao + " = " + formatarCientifico(celulasTotaisMl) + " células/mL<br>" +
+        "Células vivas/g = " + formatarCientifico(celulasVivasMl) + " células/mL × " + volumeHidratacao + " mL ÷ " + massaFermento + " g = " + formatarCientifico(celulasVivasG) + " células/g<br>" +
+        "Conversão SG → °P = -616,868 + 1111,14 × SG - 630,272 × SG² + 135,997 × SG³ = " + formatarNumero(grauPlatoCalculado, 2) + " °P<br>" +
+        "Células necessárias = " + taxaInoculacao + " × 1.000.000 × " + volumeMostoMl + " mL × " + grauPlato + " °P = " + formatarCientifico(celulasNecessarias) + " células<br>" +
+        "Células necessárias em milhões = " + formatarCientifico(celulasNecessarias) + " ÷ 1.000.000 = " + formatarNumero(celulasNecessariasMilhoes, 2) + " milhões de células<br>" +
+        "Células necessárias em bilhões = " + formatarCientifico(celulasNecessarias) + " ÷ 1.000.000.000 = " + formatarNumero(celulasNecessariasBilhoes, 2) + " bilhões de células<br>" +
+        "Massa necessária = " + formatarCientifico(celulasNecessarias) + " células ÷ " + formatarCientifico(celulasVivasG) + " células/g = " + formatarNumero(massaNecessaria, 4) + " g<br>" +
+        "Pacotes equivalentes = " + formatarNumero(massaNecessaria, 4) + " g ÷ " + formatarNumero(massaPacote, 1) + " g = " + formatarNumero(pacotesEquivalentes, 2) + " pacote(s)<br>" +
+        "Viabilidade = " + vivas + " ÷ " + totais + " × 100 = " + formatarNumero(viabilidade, 2) + "%";
+
+      atualizarTabelaResumo();
+    }
+
+    function atualizarTabelaResumo() {
+      const corpo = document.getElementById("tabelaResumo");
+      corpo.innerHTML = "";
+      Object.entries(ultimoResultado).forEach(([chave, valor]) => {
+        const linha = document.createElement("tr");
+        const celulaChave = document.createElement("th");
+        const celulaValor = document.createElement("td");
+        celulaChave.textContent = chave;
+        if (typeof valor === "number") {
+          if (Math.abs(valor) >= 100000 || (Math.abs(valor) > 0 && Math.abs(valor) < 0.001)) {
+            celulaValor.textContent = formatarCientifico(valor, 6);
+          } else {
+            celulaValor.textContent = valor.toLocaleString("pt-BR", { maximumFractionDigits: 8 });
+          }
+        } else {
+          celulaValor.textContent = valor;
+        }
+        linha.appendChild(celulaChave);
+        linha.appendChild(celulaValor);
+        corpo.appendChild(linha);
+      });
+    }
+
+    function exportarCSV() {
+      calcular();
+      let csv = "Parâmetro;Valor\n";
+      Object.entries(ultimoResultado).forEach(([chave, valor]) => {
+        csv += '"' + chave + '";' + '"' + valor + '"\n';
+      });
+      const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "resultado_contagem_inoculacao_leveduras_neubauer.csv";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
+
+    function montarRelatorioImpressao() {
+      const relatorio = document.getElementById("relatorioImpressao");
+      const formulas = document.getElementById("formulaTexto")?.innerHTML || "";
+      const interpretacao = document.getElementById("alertaContagem")?.innerHTML || "";
+
+      relatorio.innerHTML =
+        "<div class='report-header'>" +
+          "<div><h1>Relatório de contagem e inoculação de leveduras</h1>" +
+          "<p class='small'>Calculadora de Câmara de Neubauer</p></div>" +
+          "<div class='report-meta'><strong>Gerado em:</strong><br>" + escaparHtml(dataHoraAtualFormatada()) + "</div>" +
+        "</div>" +
+
+        "<h2>Identificação da amostra</h2>" +
+        "<table><tbody>" +
+          "<tr><th>Nome da amostra</th><td>" + escaparHtml(valorCampo("nomeAmostra")) + "</td></tr>" +
+          "<tr><th>Data da amostra</th><td>" + escaparHtml(valorCampo("dataAmostra")) + "</td></tr>" +
+          "<tr><th>Responsável</th><td>" + escaparHtml(valorCampo("responsavelAmostra")) + "</td></tr>" +
+          "<tr><th>Linhagem/fermento</th><td>" + escaparHtml(valorCampo("linhagemFermento")) + "</td></tr>" +
+          "<tr><th>Lote</th><td>" + escaparHtml(valorCampo("loteFermento")) + "</td></tr>" +
+          "<tr><th>Observações</th><td>" + converterQuebras(valorCampo("observacoesAmostra")) + "</td></tr>" +
+        "</tbody></table>" +
+
+        "<h2>Dados inseridos e resultados</h2>" +
+        "<table><tbody>" + converterTabelaResumoParaHtml() + "</tbody></table>" +
+
+        "<h2>Interpretação</h2>" +
+        "<div class='status-box'>" + interpretacao + "</div>" +
+
+        "<h2>Fórmulas e cálculo</h2>" +
+        "<div class='formula'>" + formulas + "</div>" +
+
+        "<h2>Observação metodológica</h2>" +
+        "<div class='warning'>A precisão do resultado depende da homogeneização da suspensão, da diluição correta, do preenchimento adequado da câmara, da padronização da regra de borda e da distinção consistente entre células vivas e mortas.</div>";
+    }
+
+    function imprimirRelatorio() {
+      calcular();
+      montarRelatorioImpressao();
+      window.print();
+    }
+
+    const gravidadeInput = document.getElementById("gravidadeEspecifica");
+    gravidadeInput.addEventListener("input", atualizarPlatoPelaGravidade);
+    gravidadeInput.addEventListener("change", atualizarPlatoPelaGravidade);
+
+    document.getElementById("quadradosMediosSelect").addEventListener("change", atualizarAreaContada);
+    document.getElementById("quadradosMediosCustom").addEventListener("input", atualizarAreaContada);
+    document.getElementById("modoContagem").addEventListener("change", atualizarModoContagem);
+
+    document.querySelectorAll("input, select, textarea").forEach(elemento => {
+      elemento.addEventListener("input", calcular);
+      elemento.addEventListener("change", calcular);
+    });
+
+    atualizarAreaContada();
+    atualizarPlatoPelaGravidade();
+    atualizarModoContagem();
+    calcular();
+  </script>
+</body>
+</html>
